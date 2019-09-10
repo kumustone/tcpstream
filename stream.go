@@ -23,8 +23,8 @@ const (
 )
 
 const (
-	CONN_TYPE_CONN   = iota //主动发起连接的TCP stream
-	CONN_TYPE_SERVER        //Server派生出来的 Tcp stream
+	CONN_TYPE_CONN   = iota //主动发起连接的TCP Stream
+	CONN_TYPE_SERVER        //Server派生出来的 Tcp Stream
 )
 
 var connID Int
@@ -144,7 +144,7 @@ func (t *TcpStream) connect() error {
 				return nil
 			}
 		} else {
-			fmt.Println("Connect success !!!!")
+			fmt.Println("Connect success : ", t.RemoteAddr)
 			t.Conn = c
 			t.State = CONN_STATE_ESTAB
 			if t.Handler != nil {

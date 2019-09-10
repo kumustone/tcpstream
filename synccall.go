@@ -14,21 +14,21 @@ resp : resp数据
 
 type SyncClient struct {
 	reqCache *RequestManager
-	stream   *TcpStream
+	Stream   *TcpStream
 }
 
 func NewSyncClient(address string) *SyncClient {
 	c := &SyncClient{
 		reqCache: NewRequestManager(),
 	}
-	c.stream = NewConnTcpStream(address, c)
-	c.stream.Start()
+	c.Stream = NewConnTcpStream(address, c)
+	c.Stream.Start()
 	return c
 }
 
 func NewSyncFromTcpStream(s *TcpStream)  *SyncClient{
 	return &SyncClient{
-		stream : s,
+		Stream:   s,
 		reqCache: NewRequestManager(),
 	}
 }
@@ -46,7 +46,7 @@ func (c *SyncClient) OnDisConn(conn *TcpStream) {
 }
 
 func (c *SyncClient) Call(msg *Message, timeOut time.Duration) (resp *Message, err error) {
-	if c.stream.State != CONN_STATE_ESTAB {
+	if c.Stream.State != CONN_STATE_ESTAB {
 		err = errors.New("connection is not exist")
 		return
 	}
@@ -56,7 +56,7 @@ func (c *SyncClient) Call(msg *Message, timeOut time.Duration) (resp *Message, e
 	respChan := make(chan *Message, 2)
 	c.reqCache.cache(reqID, respChan)
 
-	if err = c.stream.Write(msg); err != nil {
+	if err = c.Stream.Write(msg); err != nil {
 		return
 	}
 
