@@ -1,10 +1,13 @@
-一个简单的TCP长链的网络库，可以很简便的开发自己的server和client, 以此来实现基于tcp长链的主动请求，推送等业务；
+一个简单的TCP长链的网络库，可以帮助你很简便的开发基于tcp socket连接的业务。同时封装了一个类似于rpc功能的同步调用接口，可以模拟双向RPC调用，服务端主动推送，广播等业务功能。
 
-- TcpStream支持两种角色： 客户端主动发起连接的Connection，服务端Accept后派生出来的TcpStream;
-- 内部协议的实现集成了tcp数据自动分包的功能，同时Header预留了Seq和MsgType的字段给业务方使用；Seq主要用于多路复用的场景下，request与resp的对应关系；MsgType可用于业务包类型的序列化和反序列化；
-- client TcpStream默认支持自动重连，连接断开后(比如server重启)会每隔5s尝试一次重连；
-- tcpstream支持销毁（stop)的功能，被stop的client不再自动重连，如需要重新建连需要再new一个TcpStream;
-- 没有默认心跳包的支持, 如需要业务层自己实现；
+整个库的核心在于tcpstream，主要支持一下功能：
+- 支持Tcp字节流自动分包功能，使用者感知到的是msg层面的数据，不用关心底层的数据收发；
+- 支持client主动发起的Tcpstream，和Server端Accept派生出来的TcpStream，除了重连功能外，二者其他的调用接口完全相同；SyncClient基于同一条TcpStream实现双向RPC调用；
+- 支持多路复用，多个RPC请求使用一条socket连接即可，内部通信是全异步；在用户端看来SynClient是同步功能；
+- Client的tcpstream默认支持自动重连功能，连接断开后每隔5s向对端发起重连，如果不想重连调用stop接口销毁次tcpstream即可；
+- 不支持默认的心跳包功能，如业务方需要自己在上层实现；
+
+
 
 Sync调用功能：
 - client与server建立一个连接后，可通过RequestID的映射功能，实现请求方类似RPC调用功能；
@@ -12,8 +15,36 @@ Sync调用功能：
 - 同步调用接口的业务包序列化和反序列化有自己来实现；
 
 
+
+同步调用客户端的例子
+
+- 创建一个客户端
+
+```golang
+	c := NewSyncClient("127.0.0.1:7001")
+```
+
+基于已经存在tcpstream的创建，client端和server都可以
+
+```golang
+	c := NewSyncFromTcpStream(tcpstream)
+```
+
+- 同步调用，输入是要发送的msg，接收到的是对端返回的msg；然后对msg反序列化即可实现自己的业务；
+```go
+
+	if resp, err := c.Call(&m, time.Duration(2*time.Second)); err != nil {
+		fmt.Println("call fail ", err.Error())
+	} else {
+		//反序列化resp，do something
+	}
+
+```
+
+
 一个client和server的例子
 
+server
 ```go
 
 type Handler struct {
@@ -85,29 +116,4 @@ func main() {
 	}
 	select {}
 }
-```
-
-同步调用客户端的例子
-
-- 创建一个客户端
-
-```golang
-	c := NewSyncClient("127.0.0.1:7001")
-```
-
-基于已经存在tcpstream的创建，client端和server都可以
-
-```golang
-	c := NewSyncFromTcpStream(tcpstream)
-```
-
-- 调用
-```go
-
-	if resp, err := c.Call(&m, time.Duration(2*time.Second)); err != nil {
-		fmt.Println("call fail ", err.Error())
-	} else {
-		//反序列化resp，do something
-	}
-
 ```
