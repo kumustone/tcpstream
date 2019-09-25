@@ -2,9 +2,8 @@ package tcpstream
 
 import (
 	"errors"
-	"fmt"
-	"log"
 	"io"
+	"log"
 	"net"
 	"sync"
 	"time"
@@ -20,7 +19,7 @@ const (
 	CONN_STATE_ESTAB
 	CONN_STATE_CLOSE
 	CONN_STATE_CONNETING
-	CONN_STATE_STOP  //主动停止掉的，不应该占用任何资源
+	CONN_STATE_STOP //主动停止掉的，不应该占用任何资源
 )
 
 const (
