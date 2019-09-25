@@ -3,6 +3,7 @@ package tcpstream
 import (
 	"errors"
 	"fmt"
+	"log"
 	"io"
 	"net"
 	"sync"
@@ -100,7 +101,7 @@ func (t *TcpStream) readLoop() {
 		return
 	default:
 		if err := t.read(); err != nil {
-			fmt.Println("read err", err.Error())
+			log.Println("read err", err.Error())
 			if t.Handler != nil {
 				t.Handler.OnDisConn(t)
 			}
@@ -113,7 +114,6 @@ func (t *TcpStream) readLoop() {
 		go t.connect()
 	}
 
-	fmt.Println("###### (t *TcpStream) readLoop - 3")
 }
 
 //写错误不触发关闭，只有读事件触发；
@@ -134,7 +134,7 @@ func (t *TcpStream) connect() error {
 	for {
 		c, err := net.DialTimeout("tcp", t.RemoteAddr, 5*time.Second)
 		if err != nil {
-			fmt.Println("Connect fail ", err.Error())
+			log.Println("Connect fail ", err.Error())
 
 			timer := time.NewTimer(time.Second * 5)
 			select {
@@ -144,7 +144,7 @@ func (t *TcpStream) connect() error {
 				return nil
 			}
 		} else {
-			fmt.Println("Connect success : ", t.RemoteAddr)
+			log.Println("Connect success : ", t.RemoteAddr)
 			t.Conn = c
 			t.State = CONN_STATE_ESTAB
 			if t.Handler != nil {

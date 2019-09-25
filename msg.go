@@ -3,7 +3,6 @@ package tcpstream
 import (
 	"encoding/binary"
 	"errors"
-	"fmt"
 )
 
 const (
@@ -30,7 +29,6 @@ func (m *Message)Decode(buffer []byte) error {
 	if err := m.Header.decode(buffer); err != nil {
 		return err
 	}
-	fmt.Println("msg Header len ", m.Header.len)
 	if len(buffer) < int(HeaderLen + m.Header.len){
 		return errors.New("buffer len is not enough")
 	}
